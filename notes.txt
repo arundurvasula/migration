@@ -1,0 +1,15 @@
+notes:
+
+- Experiment 1/inference_v1 (10/12/16):
+
+    - data: comes from migration.py and is a low_high migration model (i.e. one constantly low migration rate and then one constantly high migration rate, changing halfway through). 
+    - The goal of this was to infer the migration rate parameters that gives the same summary statistic. I implemented the simulations again in inference_v1.py, but this time iterating over a few possible parameters for m and varying the number of time bins for m. I used the sum of squared differences between the observed and simulated summary statistics (pi, var(pi), S, var(S)) to measure the fit of each parameter (combination in the case of 2 time bins). The best fitting model is one with 2 time bins, and migration rates of 0.01 and 0.03, which fits the simulations perfectly. It's not a very fair test, but it's promising.
+    - future: 
+        - over fitting? How does the inference go with more time bins than there should be?
+        - more complex scenarios?
+            - two way migration rates
+        - likelihoods/figure out how to distinguish between models
+        - rewrite the simulation functions to handle arbitrary numbers of migration parameters
+        - figure out a better way than iterating through every possible parameter combination, right now each additional time bin adds another power of complexity
+        - inference only worked with 500K simulations per parameter combination(!) => need to figure out how to reduce this (scale simulations?)
+        - try removing means and focus only on variances
