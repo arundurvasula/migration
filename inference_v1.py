@@ -27,7 +27,7 @@ def one_bin(NA,N1,N2,Ts,M):
     #    migration_matrix=migration_matrix,
     #    demographic_events=demographic_events)
     #dp.print_history()
-
+    replicates=50000
     sim = msprime.simulate(
         Ne=NA,         
         population_configurations=population_configurations,
@@ -36,14 +36,15 @@ def one_bin(NA,N1,N2,Ts,M):
         mutation_rate=1e-7, 
         recombination_rate=1e-8,
         length=100000, 
-        num_replicates=500000)
-    pi = []
-    seg = []
-    for s in sim:
-        pi.append(s.get_pairwise_diversity())
-        seg.append(s.get_num_mutations())
+        num_replicates=replicates)
+    pi = np.zeros(replicates)
+    seg = np.zeros(replicates)
+    for j,s in enumerate(sim):
+        pi[j]=s.get_pairwise_diversity()
+        seg[j] = s.get_num_mutations()
 
-    return(np.array([np.mean(pi),np.var(pi),np.mean(seg),np.var(seg)]))
+    #return(np.array([np.mean(pi),np.var(pi),np.mean(seg),np.var(seg)]))
+    return(np.array([np.var(pi),np.var(seg)]))
 
 def two_bins(NA,N1,N2,Ts,M1,M2):
     NA=NA
@@ -74,22 +75,24 @@ def two_bins(NA,N1,N2,Ts,M1,M2):
     #    demographic_events=demographic_events)
     #dp.print_history()
 
+    replicates=50000
     sim = msprime.simulate(
         Ne=NA,         
         population_configurations=population_configurations,
         migration_matrix=migration_matrix,
         demographic_events=demographic_events,
-        mutation_rate=1e-7,
+        mutation_rate=1e-7, 
         recombination_rate=1e-8,
         length=100000, 
-        num_replicates=500000)
-    pi = []
-    seg = []
-    for s in sim:
-        pi.append(s.get_pairwise_diversity())
-        seg.append(s.get_num_mutations())
+        num_replicates=replicates)
+    pi = np.zeros(replicates)
+    seg = np.zeros(replicates)
+    for j,s in enumerate(sim):
+        pi[j]=s.get_pairwise_diversity()
+        seg[j] = s.get_num_mutations()
 
-    return(np.array([np.mean(pi),np.var(pi),np.mean(seg),np.var(seg)]))
+    #return(np.array([np.mean(pi),np.var(pi),np.mean(seg),np.var(seg)]))
+    return(np.array([np.var(pi),np.var(seg)]))
 
 def three_bins(NA,N1,N2,Ts,M1,M2,M3):
     NA=NA
@@ -140,41 +143,42 @@ def three_bins(NA,N1,N2,Ts,M1,M2,M3):
 
 
 # data comes from migration.py simulations of low_high model
-data = np.array([19.9988318604,71.4938202807,89.598257,553.867747562])
+#data = np.array([19.9988318604,71.4938202807,89.598257,553.867747562])
+data = np.array([71.4938202807,553.867747562])
 
 # try to match with one time bin
-#deltas = []
-#for i in np.arange(0.01,0.05, 0.01):
-#    print(i)
-#    result = one_bin(500,500,500,10000,i)
-#    deltas.append([i,np.sum(np.power((result-data),2))])
-#print("One time bin (migration parameter, delta_variance)")
-#for d in deltas:
-#    print(d)
+deltas = []
+for i in np.arange(0.01,0.05, 0.01):
+    print("Testing parameter:",i)
+    result = one_bin(500,500,500,10000,i)
+    deltas.append([i,np.sum(np.power((result-data),2)/result)])
+print("mig delta")
+for d in deltas:
+    print(d[0],d[1])
 
 #----
 # try to match with two time bins
 # 8,000,000 simulations
-#deltas = []
-#for i in np.arange(0.01,0.05, 0.01):
-#    for j in np.arange(0.01,0.05, 0.01):
-#        print(i,j)
-#        result = two_bins(500,500,500,10000,i, j)
-#        deltas.append([i, j, np.sum(np.power((result-data),2))])
-#print("Two time bins (migration parameter (k=1), migration parameter (k=2), delta_variance)")
-#for d in deltas:
-#    print(d)
+deltas = []
+for i in np.arange(0.01,0.05, 0.01):
+    for j in np.arange(0.01,0.05, 0.01):
+        print("Testing parameters:",i,j)
+        result = two_bins(500,500,500,10000,i, j)
+        deltas.append([i, j, np.sum(np.power((result-data),2)/result)])
+print("mig1 mig2 delta")
+for d in deltas:
+    print(d[0],d[1],d[2])
 
 #----
 # try to match with three time bins
 # 32,000,000 simulations
-deltas = []
-for i in np.arange(0.01,0.05, 0.01):
-    for j in np.arange(0.01,0.05, 0.01):
-        for k in np.arange(0.01,0.05, 0.01):
-            print(i,j,k)
-            result = three_bins(500,500,500,10000,i,j,k)
-            deltas.append([i, j, k, np.sum(np.power((result-data),2))])
-print("Three time bins (migration parameter (k=1), migration parameter (k=2), migration parameter (k=3), delta_variance)")
-for d in deltas:
-    print(d)
+#deltas = []
+#for i in np.arange(0.01,0.05, 0.01):
+#    for j in np.arange(0.01,0.05, 0.01):
+#        for k in np.arange(0.01,0.05, 0.01):
+#            print(i,j,k)
+#            result = three_bins(500,500,500,10000,i,j,k)
+#            deltas.append([i, j, k, np.sum(np.power((result-data),2))])
+#print("Three time bins (migration parameter (k=1), migration parameter (k=2), migration parameter (k=3), delta_variance)")
+#for d in deltas:
+#    print(d)
