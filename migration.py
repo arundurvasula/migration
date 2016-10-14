@@ -75,7 +75,7 @@ def two_bin(NA,N1,N2,Ts,M1,M2):
         migration_matrix=migration_matrix,
         demographic_events=demographic_events)
     #dp.print_history()
-
+    replicates=10000
     sim = msprime.simulate(
         Ne=NA,         
         population_configurations=population_configurations,
@@ -84,21 +84,21 @@ def two_bin(NA,N1,N2,Ts,M1,M2):
         mutation_rate=1e-7,
         recombination_rate=1e-8,
         length=100000, 
-        num_replicates=1000000)
-    pi = []
-    seg = []
-    for s in sim:
-        pi.append(s.get_pairwise_diversity())
-        seg.append(s.get_num_mutations())
+        num_replicates=replicates)
+    pi = np.zeros(replicates)
+    seg = np.zeros(replicates)
+    ld = np.zeros(replicates)
+    for j,s in enumerate(sim):
+        pi[j]=s.get_pairwise_diversity()
+        seg[j] = s.get_num_mutations()
+        ld[j] = np.var(msprime.LdCalculator(s).get_r2_matrix())
 
-    print(np.mean(pi))
-    print(np.var(pi))
-    print(np.mean(seg))
-    print(np.var(seg))  
+    #return(np.array([np.mean(pi),np.var(pi),np.mean(seg),np.var(seg)]))
+    return(np.array([np.var(pi),np.var(seg),np.var(ld)])) 
     
 print("constant")
 #one_bin(500,500,500,10000,0.02)
 print("high low")
 #two_bin(500,500,500,10000,0.03,0.01)
 print("low high")
-two_bin(500,500,500,10000,0.01,0.03)
+print(two_bin(500,500,500,10000,0.01,0.03))

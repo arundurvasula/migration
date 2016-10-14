@@ -27,7 +27,7 @@ def one_bin(NA,N1,N2,Ts,M):
     #    migration_matrix=migration_matrix,
     #    demographic_events=demographic_events)
     #dp.print_history()
-    replicates=50000
+    replicates=10000
     sim = msprime.simulate(
         Ne=NA,         
         population_configurations=population_configurations,
@@ -39,12 +39,14 @@ def one_bin(NA,N1,N2,Ts,M):
         num_replicates=replicates)
     pi = np.zeros(replicates)
     seg = np.zeros(replicates)
+    ld = np.zeros(replicates)
     for j,s in enumerate(sim):
         pi[j]=s.get_pairwise_diversity()
         seg[j] = s.get_num_mutations()
+        ld[j] = np.var(msprime.LdCalculator(s).get_r2_matrix())
 
     #return(np.array([np.mean(pi),np.var(pi),np.mean(seg),np.var(seg)]))
-    return(np.array([np.var(pi),np.var(seg)]))
+    return(np.array([np.var(pi),np.var(seg),np.var(ld)]))
 
 def two_bins(NA,N1,N2,Ts,M1,M2):
     NA=NA
@@ -75,7 +77,7 @@ def two_bins(NA,N1,N2,Ts,M1,M2):
     #    demographic_events=demographic_events)
     #dp.print_history()
 
-    replicates=50000
+    replicates=10000
     sim = msprime.simulate(
         Ne=NA,         
         population_configurations=population_configurations,
@@ -87,12 +89,14 @@ def two_bins(NA,N1,N2,Ts,M1,M2):
         num_replicates=replicates)
     pi = np.zeros(replicates)
     seg = np.zeros(replicates)
+    ld = np.zeros(replicates)
     for j,s in enumerate(sim):
         pi[j]=s.get_pairwise_diversity()
         seg[j] = s.get_num_mutations()
+        ld[j] = np.var(msprime.LdCalculator(s).get_r2_matrix())
 
     #return(np.array([np.mean(pi),np.var(pi),np.mean(seg),np.var(seg)]))
-    return(np.array([np.var(pi),np.var(seg)]))
+    return(np.array([np.var(pi),np.var(seg), np.var(ld)]))
 
 def three_bins(NA,N1,N2,Ts,M1,M2,M3):
     NA=NA
@@ -144,14 +148,16 @@ def three_bins(NA,N1,N2,Ts,M1,M2,M3):
 
 # data comes from migration.py simulations of low_high model
 #data = np.array([19.9988318604,71.4938202807,89.598257,553.867747562])
-data = np.array([71.4938202807,553.867747562])
+#data = np.array([71.4938202807,553.867747562])
+data = np.array([6.99305621e+01,5.37923633e+02,1.01174646e-03])
 
 # try to match with one time bin
 deltas = []
+print("Time bins (k) = 1; X^2 df=1; 0.05 critical value: 0.004")
 for i in np.arange(0.01,0.05, 0.01):
     print("Testing parameter:",i)
     result = one_bin(500,500,500,10000,i)
-    deltas.append([i,np.sum(np.power((result-data),2)/result)])
+    deltas.append([i,np.sum((np.power((result-data),2)/result))])
 print("mig delta")
 for d in deltas:
     print(d[0],d[1])
@@ -160,11 +166,12 @@ for d in deltas:
 # try to match with two time bins
 # 8,000,000 simulations
 deltas = []
+print("Time bins (k) = 2; X^2 df=1; 0.05 critical value: 0.004")
 for i in np.arange(0.01,0.05, 0.01):
     for j in np.arange(0.01,0.05, 0.01):
         print("Testing parameters:",i,j)
         result = two_bins(500,500,500,10000,i, j)
-        deltas.append([i, j, np.sum(np.power((result-data),2)/result)])
+        deltas.append([i, j, np.sum((np.power((result-data),2)/result))])
 print("mig1 mig2 delta")
 for d in deltas:
     print(d[0],d[1],d[2])
