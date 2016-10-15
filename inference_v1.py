@@ -27,7 +27,7 @@ def one_bin(NA,N1,N2,Ts,M):
     #    migration_matrix=migration_matrix,
     #    demographic_events=demographic_events)
     #dp.print_history()
-    replicates=10000
+    replicates=500000
     sim = msprime.simulate(
         Ne=NA,         
         population_configurations=population_configurations,
@@ -46,7 +46,8 @@ def one_bin(NA,N1,N2,Ts,M):
         ld[j] = np.var(msprime.LdCalculator(s).get_r2_matrix())
 
     #return(np.array([np.mean(pi),np.var(pi),np.mean(seg),np.var(seg)]))
-    return(np.array([np.var(pi),np.var(seg),np.var(ld)]))
+    #return(np.array([np.var(pi),np.var(seg),np.var(ld)]))
+    return(np.array([np.var(seg)]))
 
 def two_bins(NA,N1,N2,Ts,M1,M2):
     NA=NA
@@ -77,7 +78,7 @@ def two_bins(NA,N1,N2,Ts,M1,M2):
     #    demographic_events=demographic_events)
     #dp.print_history()
 
-    replicates=10000
+    replicates=500000
     sim = msprime.simulate(
         Ne=NA,         
         population_configurations=population_configurations,
@@ -96,7 +97,8 @@ def two_bins(NA,N1,N2,Ts,M1,M2):
         ld[j] = np.var(msprime.LdCalculator(s).get_r2_matrix())
 
     #return(np.array([np.mean(pi),np.var(pi),np.mean(seg),np.var(seg)]))
-    return(np.array([np.var(pi),np.var(seg), np.var(ld)]))
+    #return(np.array([np.var(pi),np.var(seg), np.var(ld)]))
+    return(np.array([np.var(seg)]))
 
 def three_bins(NA,N1,N2,Ts,M1,M2,M3):
     NA=NA
@@ -149,7 +151,8 @@ def three_bins(NA,N1,N2,Ts,M1,M2,M3):
 # data comes from migration.py simulations of low_high model
 #data = np.array([19.9988318604,71.4938202807,89.598257,553.867747562])
 #data = np.array([71.4938202807,553.867747562])
-data = np.array([6.99305621e+01,5.37923633e+02,1.01174646e-03])
+#data = np.array([7.13379212e+01,5.54869484e+02,1.04169238e-03])
+data = np.array([5.54869484e+02])
 
 # try to match with one time bin
 deltas = []

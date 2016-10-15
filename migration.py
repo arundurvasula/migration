@@ -75,7 +75,7 @@ def two_bin(NA,N1,N2,Ts,M1,M2):
         migration_matrix=migration_matrix,
         demographic_events=demographic_events)
     #dp.print_history()
-    replicates=10000
+    replicates=1000000
     sim = msprime.simulate(
         Ne=NA,         
         population_configurations=population_configurations,
