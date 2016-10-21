@@ -9,12 +9,12 @@ def one_bin(NA,N1,N2,Ts,M):
     Ts=Ts
     M_ave=M
     population_configurations = [
-        msprime.PopulationConfiguration(sample_size=0, initial_size=N1),
+        msprime.PopulationConfiguration(sample_size=50, initial_size=N1),
         msprime.PopulationConfiguration(sample_size=50, initial_size=N2)
     ]
     migration_matrix = [
         [0, M_ave],
-        [0, 0]
+        [M_ave, 0]
     ]
     demographic_events = [
         msprime.MassMigration(time=Ts, source=1, destination=0, proportion=1.0)
@@ -26,26 +26,32 @@ def one_bin(NA,N1,N2,Ts,M):
         migration_matrix=migration_matrix,
         demographic_events=demographic_events)
     #dp.print_history()
-
+    
+    
+    replicates=10
+    length=100000
     sim = msprime.simulate(
         Ne=NA,         
         population_configurations=population_configurations,
         migration_matrix=migration_matrix,
         demographic_events=demographic_events,
-        mutation_rate=1e-7, 
+        mutation_rate=1e-7,
         recombination_rate=1e-8,
-        length=100000, 
-        num_replicates=1000000)
-    pi = []
-    seg = []
-    for s in sim:
-        pi.append(s.get_pairwise_diversity())
-        seg.append(s.get_num_mutations())
-
-    print(np.mean(pi))
-    print(np.var(pi))
-    print(np.mean(seg))
-    print(np.var(seg))
+        length=length, 
+        num_replicates=replicates)
+        
+    pairwise_diff = []
+    for j, s in enumerate(sim):
+        s0 = len(s.get_samples(0))
+        s1 = len(s.get_samples(1))
+        haps = [h for h in s.haplotypes()]
+        h0 = haps[0:s0]
+        h1 = haps[s0:s0+s1-1]
+        for hap0 in h0:
+            for hap1 in h1:
+                pairwise_diff.append(sum(1 for a, b in zip(hap0, hap1) if a != b))
+    return(np.var(np.array(pairwise_diff)))
+    
  
 def two_bin(NA,N1,N2,Ts,M1,M2):
     NA=NA
@@ -56,16 +62,16 @@ def two_bin(NA,N1,N2,Ts,M1,M2):
     M2=M2
     
     population_configurations = [
-        msprime.PopulationConfiguration(sample_size=0, initial_size=N1),
+        msprime.PopulationConfiguration(sample_size=50, initial_size=N1),
         msprime.PopulationConfiguration(sample_size=50, initial_size=N2)
     ]
     migration_matrix = [
         [0, M2],
-        [0, 0]
+        [M1, 0]
     ]
     demographic_events = [
         msprime.MigrationRateChange(time=Ts/2, rate=M1, matrix_index=(0, 1)),
-        #msprime.MigrationRateChange(time=Ts/2, rate=M1, matrix_index=(1, 0)),
+        msprime.MigrationRateChange(time=Ts/2, rate=M2, matrix_index=(1, 0)),
         msprime.MassMigration(time=Ts, source=1, destination=0, proportion=1.0)
     ]
     
@@ -86,29 +92,21 @@ def two_bin(NA,N1,N2,Ts,M1,M2):
         recombination_rate=1e-8,
         length=length, 
         num_replicates=replicates)
-    #pi = np.zeros(replicates)
-    #seg = np.zeros(replicates)
-    #ld = np.zeros(replicates)
-    #for j,s in enumerate(sim):
-    #    pi[j]=s.get_pairwise_diversity()
-    #    seg[j] = s.get_num_mutations()
-    #    ld[j] = np.var(msprime.LdCalculator(s).get_r2_matrix())
-
-    #return(np.array([np.mean(pi),np.var(pi),np.mean(seg),np.var(seg)]))
-    #return(np.array([np.var(pi),np.var(seg),np.var(ld)])) 
+    pairwise_diff = []
+    for j, s in enumerate(sim):
+        s0 = len(s.get_samples(0))
+        s1 = len(s.get_samples(1))
+        haps = [h for h in s.haplotypes()]
+        h0 = haps[0:s0]
+        h1 = haps[s0:s0+s1-1]
+        for hap0 in h0:
+            for hap1 in h1:
+                pairwise_diff.append(sum(1 for a, b in zip(hap0, hap1) if a != b))
+    return(np.var(np.array(pairwise_diff)))
     
-    # for MS like output (for msstats)
-    for j,s in enumerate(sim):
-        print("//")
-        print("segsites: "+ str(s.get_num_mutations()))
-        pos = [((mut.position)/length) for mut in s.mutations()]
-        print("positions: "+ " ".join(str(e) for e in pos))
-        for h in s.haplotypes():
-            print(h)
-    
-#print("constant")
-#one_bin(500,500,500,10000,0.02)
-#print("high low")
-#two_bin(500,500,500,10000,0.03,0.01)
-#print("low high")
+print("constant")
+one_bin(500,500,500,10000,0.02)
+print("high low")
+two_bin(500,500,500,10000,0.03,0.01)
+print("low high")
 print(two_bin(500,250,250,10000,0.01,0.03))
