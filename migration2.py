@@ -28,7 +28,7 @@ def one_bin(NA,N1,N2,Ts,M):
     #dp.print_history()
     
     
-    replicates=10
+    replicates=10000
     length=100000
     sim = msprime.simulate(
         Ne=NA,         
@@ -66,11 +66,11 @@ def two_bin(NA,N1,N2,Ts,M1,M2):
         msprime.PopulationConfiguration(sample_size=50, initial_size=N2)
     ]
     migration_matrix = [
-        [0, M2],
+        [0, M1],
         [M1, 0]
     ]
     demographic_events = [
-        msprime.MigrationRateChange(time=Ts/2, rate=M1, matrix_index=(0, 1)),
+        msprime.MigrationRateChange(time=Ts/2, rate=M2, matrix_index=(0, 1)),
         msprime.MigrationRateChange(time=Ts/2, rate=M2, matrix_index=(1, 0)),
         msprime.MassMigration(time=Ts, source=1, destination=0, proportion=1.0)
     ]
@@ -81,7 +81,7 @@ def two_bin(NA,N1,N2,Ts,M1,M2):
         migration_matrix=migration_matrix,
         demographic_events=demographic_events)
     #dp.print_history()
-    replicates=10
+    replicates=10000
     length=100000
     sim = msprime.simulate(
         Ne=NA,         
@@ -103,10 +103,10 @@ def two_bin(NA,N1,N2,Ts,M1,M2):
             for hap1 in h1:
                 pairwise_diff.append(sum(1 for a, b in zip(hap0, hap1) if a != b))
     return(np.var(np.array(pairwise_diff)))
-    
-print("constant")
-one_bin(500,500,500,10000,0.02)
-print("high low")
-two_bin(500,500,500,10000,0.03,0.01)
-print("low high")
-print(two_bin(500,250,250,10000,0.01,0.03))
+if __name__ == "__main__":    
+    print("constant")
+    print(one_bin(500,250,250,10000,0.02))
+    print("high low")
+    print(two_bin(500,250,250,10000,0.03,0.01))
+    print("low high")
+    print(two_bin(500,250,250,10000,0.01,0.03))
