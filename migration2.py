@@ -2,6 +2,9 @@ import msprime
 import math
 import numpy as np
 
+def pairwise_diffs(hap0, hap1):
+    return sum(1 for a, b in zip(hap0, hap1) if a != b)
+
 def one_bin(NA,N1,N2,Ts,M):
     NA=NA
     N1=N1
@@ -28,7 +31,7 @@ def one_bin(NA,N1,N2,Ts,M):
     #dp.print_history()
     
     
-    replicates=10000
+    replicates=1
     length=100000
     sim = msprime.simulate(
         Ne=NA,         
@@ -47,9 +50,12 @@ def one_bin(NA,N1,N2,Ts,M):
         haps = [h for h in s.haplotypes()]
         h0 = haps[0:s0]
         h1 = haps[s0:s0+s1-1]
+        
         for hap0 in h0:
             for hap1 in h1:
                 pairwise_diff.append(sum(1 for a, b in zip(hap0, hap1) if a != b))
+        #pairwise_diff.append([pairwise_diffs(hap0,hap1) for hap0 in h0 for hap1 in h1])
+            
     return(np.var(np.array(pairwise_diff)))
     
  
@@ -81,7 +87,7 @@ def two_bin(NA,N1,N2,Ts,M1,M2):
         migration_matrix=migration_matrix,
         demographic_events=demographic_events)
     #dp.print_history()
-    replicates=10000
+    replicates=1
     length=100000
     sim = msprime.simulate(
         Ne=NA,         
@@ -106,7 +112,7 @@ def two_bin(NA,N1,N2,Ts,M1,M2):
 if __name__ == "__main__":    
     print("constant")
     print(one_bin(500,250,250,10000,0.02))
-    print("high low")
-    print(two_bin(500,250,250,10000,0.03,0.01))
-    print("low high")
-    print(two_bin(500,250,250,10000,0.01,0.03))
+    #print("high low")
+    #print(two_bin(500,250,250,10000,0.03,0.01))
+    #print("low high")
+    #print(two_bin(500,250,250,10000,0.01,0.03))
