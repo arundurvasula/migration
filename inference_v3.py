@@ -26,7 +26,7 @@ def one_param():
         if np.absolute(sim_stat - data) < delta:
             param0.append(mig)
         num_sims = num_sims + 1
-        if num_sims % 1000 == 0:
+        if num_sims % 10000 == 0:
             print("Finished", num_sims, "simulations", file=sys.stderr)
     
     print("Number of accepted simulations:", len(param0))
@@ -59,7 +59,7 @@ def two_params():
             param0.append(mig0)
             param1.append(mig1)
         num_sims = num_sims + 1
-        if num_sims % 1000 == 0:
+        if num_sims % 10000 == 0:
             print("Finished", num_sims, "simulations", file=sys.stderr)
     
     print("Number of accepted simulations:", len(param0))
